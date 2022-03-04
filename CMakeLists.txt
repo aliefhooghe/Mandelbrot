@@ -12,7 +12,9 @@ find_package(GLEW REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(fast_mandelbrot
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/gpu_texture.cuh
+    ${CMAKE_CURRENT_SOURCE_DIR}/gpu_texture.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/cuda_exception.cuh
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
 
@@ -20,4 +22,5 @@ target_link_libraries(fast_mandelbrot PUBLIC
     SDL2::SDL2
     OpenGL::GL
     OpenGL::GLU
-    GLEW::GLEW)
+    GLEW::GLEW
+)
