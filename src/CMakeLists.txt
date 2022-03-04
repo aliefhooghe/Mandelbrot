@@ -12,10 +12,14 @@ find_package(GLEW REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(fast_mandelbrot
-    ${CMAKE_CURRENT_SOURCE_DIR}/gpu_texture.cuh
-    ${CMAKE_CURRENT_SOURCE_DIR}/gpu_texture.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/cuda_exception.cuh
+    ${CMAKE_CURRENT_SOURCE_DIR}/gpu_texture.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/gpu_texture.cuh
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mandelbrot_kernel.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/mandelbrot_kernel.cuh
+    ${CMAKE_CURRENT_SOURCE_DIR}/program.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/program.h
 )
 
 target_link_libraries(fast_mandelbrot PUBLIC

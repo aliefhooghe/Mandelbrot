@@ -8,7 +8,7 @@
 #include <cudaGL.h>
 #include <cuda_gl_interop.h>
 
-namespace Xrender
+namespace FastMandelbrot
 {
 
     class registered_texture
@@ -47,6 +47,8 @@ namespace Xrender
         /**
          * \brief Return a handle to a surface object mapped
          * to the openGL texture.
+         * /!\ The texture is not reachable by openGL untile the
+         * mapped surface is destroyed.
          */
         __host__ mapped_surface get_mapped_surface();
 

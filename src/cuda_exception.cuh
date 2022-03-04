@@ -26,7 +26,7 @@
     }
 
 
-namespace Xrender {
+namespace FastMandelbrot {
 
     class cuda_exception : public std::exception {
 

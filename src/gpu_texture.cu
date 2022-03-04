@@ -2,7 +2,7 @@
 #include "cuda_exception.cuh"
 #include "gpu_texture.cuh"
 
-namespace Xrender
+namespace FastMandelbrot
 {
 
     registered_texture::mapped_surface::mapped_surface(registered_texture& texture)
