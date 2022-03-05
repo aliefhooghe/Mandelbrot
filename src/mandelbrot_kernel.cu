@@ -6,18 +6,39 @@ namespace FastMandelbrot
 {
     static constexpr auto THREAD_PER_BLOCK = 64u;
 
+    // Reference:
     static __global__ void _mandelbrot_kernel(
         cudaSurfaceObject_t surface, unsigned int width,
-        float2 origin, float radius, unsigned int step_count)
+        float2 origin, float size, unsigned int step_count)
     {
         //  Get pixel position in image
         const auto x = blockIdx.x * blockDim.x + threadIdx.x;
         const auto y = blockIdx.y;
-        float4 rgba_value{1.f, 0, 0, 1.f};
+
+        const auto unit_per_pixel = size / static_cast<float>(width);
 
         if (x < width)
         {
-            surf2Dwrite(rgba_value, surface, x * sizeof(float4), y);
+            const auto c = float2{
+                origin.x + unit_per_pixel * x,
+                origin.y + unit_per_pixel * y
+            };
+            auto sequence = float2{0.f, 0.f};
+
+            int count = 0;
+            // while count < step_count && |sequence| < 2.
+            while (count < step_count && sequence.x * sequence.x + sequence.y * sequence.y < 4.f)
+            {
+                const auto next_sequence = float2{
+                    sequence.x * sequence.x - sequence.y * sequence.y + c.x,
+                    2.f * sequence.x * sequence.y + c.y};
+                sequence = next_sequence;
+                count++;
+            }
+
+            const auto value = static_cast<float>(count) / static_cast<float>(step_count);
+            const auto rgba = float4{value, value, value, 1.f};
+            surf2Dwrite(rgba, surface, x * sizeof(float4), y);
         }
     }
 
@@ -30,12 +51,12 @@ namespace FastMandelbrot
 
     void call_mandelbrot_kernel(
         cudaSurfaceObject_t surface, unsigned int width, unsigned int height,
-        float2 origin, float radius, unsigned int step_count)
+        float2 origin, float size, unsigned int step_count)
     {
         unsigned int thread_per_block = THREAD_PER_BLOCK;
         const auto grid_dim = _image_grid_dim(width, height, thread_per_block);
 
-        _mandelbrot_kernel<<<grid_dim, thread_per_block>>>(surface, width, origin, radius, step_count);
+        _mandelbrot_kernel<<<grid_dim, thread_per_block>>>(surface, width, origin, size, step_count);
 
         // wait the device and catch kernel errors (such as invalid memory access)
         CUDA_CHECK(cudaDeviceSynchronize());

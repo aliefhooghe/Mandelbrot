@@ -20,10 +20,10 @@ namespace FastMandelbrot
         void run();
 
     private:
-        void _handle_key_down(SDL_Keysym key);
-        void _handle_mouse_wheel(bool up);
-        void _handle_mouse_motion(int xrel, int yrel);
-        bool _handle_events();
+        bool _handle_key_down(SDL_Keysym key);
+        bool _handle_mouse_wheel(bool up);
+        bool _handle_mouse_drag(int xrel, int yrel);
+        bool _handle_events(registered_texture& texture);
         void _draw_texture();
         void _update_size();
 
@@ -35,10 +35,12 @@ namespace FastMandelbrot
         SDL_GLContext _gl_context;
         GLuint _texture_id;
 
-        float _origin_x{0.f};
-        float _origin_y{0.f};
-        float _radius{1.5f};
+        float _origin_x{-1.f};
+        float _origin_y{-1.f};
+        float _size{1.f};
         unsigned int _step_count{100};
+
+        bool _drag{false};
     };
 
 }

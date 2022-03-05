@@ -1,5 +1,6 @@
 
 #include <stdexcept>
+#include <iostream>
 #include <GL/glew.h>
 
 #include "program.h"
@@ -57,45 +58,98 @@ namespace FastMandelbrot
         SDL_ShowWindow(_window);
         _update_size();
 
-        while (_handle_events())
-        {
-            _render_frame(texture);
-            _draw_texture();
-        }
+        while (_handle_events(texture));
 
         SDL_HideWindow(_window);
     }
 
-    void program::_handle_key_down(SDL_Keysym key)
+    bool program::_handle_key_down(SDL_Keysym key)
     {
         switch (key.sym)
         {
+            case SDLK_KP_PLUS:
+                _step_count *= 2;
+                break;
+
+            case SDLK_KP_MINUS:
+                _step_count /= 2;
+                if (_step_count < 2) _step_count = 1;
+                break;
+
+            case SDLK_RETURN:
+                break;
+
+            case SDLK_SPACE:
+                break;
+
+            default:
+                return false;
         }
+
+        std::cout << "step count = " << _step_count << std::endl;
+        return true;
     }
 
-    void program::_handle_mouse_wheel(bool up)
+    bool program::_handle_mouse_wheel(bool up)
     {
+        constexpr auto factor = 1.1f;
+        const auto new_size = _size * (up ? (1.f / factor) : factor);
+        const auto origin_offset = (_size - new_size) / 2.f;
+
+        _size = new_size;
+        _origin_x += origin_offset;
+        _origin_y += origin_offset;
+
+        return true;
     }
 
-    void program::_handle_mouse_motion(int xrel, int yrel)
+    bool program::_handle_mouse_drag(int xrel, int yrel)
     {
+        const auto unit_per_pixel = _size / static_cast<float>(_width);
+        _origin_x -= unit_per_pixel * static_cast<float>(xrel);
+        _origin_y += unit_per_pixel * static_cast<float>(yrel);
+        return true;
     }
 
-    bool program::_handle_events()
+    bool program::_handle_events(registered_texture& texture)
     {
         SDL_Event event;
+        bool redraw = false;
+
         while (SDL_PollEvent(&event)) {
             switch (event.type)
             {
-                case SDL_KEYDOWN:       _handle_key_down(event.key.keysym); break;
-                case SDL_MOUSEWHEEL:    _handle_mouse_wheel(event.wheel.y > 0); break;
-                case SDL_MOUSEMOTION:   _handle_mouse_motion(event.motion.xrel, event.motion.yrel); break;
-                case SDL_QUIT:          return false;
-
+                case SDL_KEYDOWN:
+                    redraw = _handle_key_down(event.key.keysym);
+                    break;
+                case SDL_MOUSEWHEEL:
+                    redraw = _handle_mouse_wheel(event.wheel.y > 0);
+                    break;
+                case SDL_MOUSEMOTION:
+                    if (_drag)
+                        redraw = _handle_mouse_drag(event.motion.xrel, event.motion.yrel);
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    if (event.button.button == SDL_BUTTON_LEFT) _drag = true;
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    if (event.button.button == SDL_BUTTON_LEFT) _drag = false;
+                    break;
                 case SDL_WINDOWEVENT:
                     if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                         _update_size();
+                    else if (event.window.event == SDL_WINDOWEVENT_EXPOSED)
+                        redraw = true;
+                    break;
+                case SDL_QUIT:
+                    return false;
             }
+        }
+
+        if (redraw)
+        {
+            _render_frame(texture);
+            _draw_texture();
         }
 
         return true;
@@ -144,6 +198,6 @@ namespace FastMandelbrot
     {
         const auto origin = float2{_origin_x, _origin_y};
         auto mapped_surface = texture.get_mapped_surface();
-        call_mandelbrot_kernel(mapped_surface.surface(), _width, _height, origin, _radius, _step_count);
+        call_mandelbrot_kernel(mapped_surface.surface(), _width, _height, origin, _size, _step_count);
     }
 }
