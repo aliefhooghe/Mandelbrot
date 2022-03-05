@@ -35,9 +35,9 @@ namespace FastMandelbrot
         SDL_GLContext _gl_context;
         GLuint _texture_id;
 
-        float _origin_x{-1.f};
-        float _origin_y{-1.f};
-        float _size{1.f};
+        double _origin_x{-1.f};
+        double _origin_y{-1.f};
+        double _size{1.f};
         unsigned int _step_count{100};
 
         bool _drag{false};

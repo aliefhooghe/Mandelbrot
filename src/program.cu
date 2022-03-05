@@ -106,9 +106,9 @@ namespace FastMandelbrot
 
     bool program::_handle_mouse_drag(int xrel, int yrel)
     {
-        const auto unit_per_pixel = _size / static_cast<float>(_width);
-        _origin_x -= unit_per_pixel * static_cast<float>(xrel);
-        _origin_y += unit_per_pixel * static_cast<float>(yrel);
+        const auto unit_per_pixel = _size / static_cast<double>(_width);
+        _origin_x -= unit_per_pixel * static_cast<double>(xrel);
+        _origin_y += unit_per_pixel * static_cast<double>(yrel);
         return true;
     }
 
@@ -204,7 +204,7 @@ namespace FastMandelbrot
 
     void program::_render_frame(registered_texture& texture)
     {
-        const auto origin = float2{_origin_x, _origin_y};
+        const auto origin = double2{_origin_x, _origin_y};
         auto mapped_surface = texture.get_mapped_surface();
         call_mandelbrot_kernel(mapped_surface.surface(), _width, _height, origin, _size, _step_count);
     }

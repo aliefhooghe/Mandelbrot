@@ -4,32 +4,32 @@
 
 namespace FastMandelbrot
 {
-    static constexpr auto THREAD_PER_BLOCK = 64u;
+    static constexpr auto THREAD_PER_BLOCK = 1024u;
 
     // Reference:
     static __global__ void _mandelbrot_kernel(
         cudaSurfaceObject_t surface, unsigned int width,
-        float2 origin, float size, unsigned int step_count)
+        double2 origin, double size, unsigned int step_count)
     {
         //  Get pixel position in image
         const auto x = blockIdx.x * blockDim.x + threadIdx.x;
         const auto y = blockIdx.y;
 
-        const auto unit_per_pixel = size / static_cast<float>(width);
+        const auto unit_per_pixel = size / static_cast<double>(width);
 
         if (x < width)
         {
-            const auto c = float2{
+            const auto c = double2{
                 origin.x + unit_per_pixel * x,
                 origin.y + unit_per_pixel * y
             };
-            auto sequence = float2{0.f, 0.f};
+            auto sequence = double2{0., 0.};
 
             int count = 0;
             // while count < step_count && |sequence| < 2.
-            while (count < step_count && sequence.x * sequence.x + sequence.y * sequence.y < 4.f)
+            while (count < step_count && sequence.x * sequence.x + sequence.y * sequence.y < 4.)
             {
-                const auto next_sequence = float2{
+                const auto next_sequence = double2{
                     sequence.x * sequence.x - sequence.y * sequence.y + c.x,
                     2.f * sequence.x * sequence.y + c.y};
                 sequence = next_sequence;
@@ -51,7 +51,7 @@ namespace FastMandelbrot
 
     void call_mandelbrot_kernel(
         cudaSurfaceObject_t surface, unsigned int width, unsigned int height,
-        float2 origin, float size, unsigned int step_count)
+        double2 origin, double size, unsigned int step_count)
     {
         unsigned int thread_per_block = THREAD_PER_BLOCK;
         const auto grid_dim = _image_grid_dim(width, height, thread_per_block);
