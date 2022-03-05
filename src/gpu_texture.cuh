@@ -53,7 +53,7 @@ namespace FastMandelbrot
         __host__ mapped_surface get_mapped_surface();
 
         /**
-         * \brief Download the tecture from the device
+         * \brief Download the tecture from the device (e.g to write in a file)
          */
         __host__ std::vector<float4> retrieve_texture();
 
