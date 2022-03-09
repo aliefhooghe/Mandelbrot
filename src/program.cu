@@ -1,6 +1,7 @@
 
-#include <stdexcept>
+#include <chrono>
 #include <iostream>
+#include <stdexcept>
 #include <GL/glew.h>
 
 #include "program.h"
@@ -148,7 +149,14 @@ namespace FastMandelbrot
 
         if (redraw)
         {
+            using namespace std::chrono;
+
+            const auto start = steady_clock::now();
             _render_frame(texture);
+            const auto end = steady_clock::now();
+            const auto duration = duration_cast<microseconds>(end - start).count();
+            const auto fps = static_cast<int>(1.E6 / static_cast<double>(duration));
+            std::cout << fps << " fps (" << (duration / 1000u) << " ms)\n";
             _draw_texture();
         }
 
